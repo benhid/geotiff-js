@@ -1,0 +1,20 @@
+{
+  "name": "load-georaster",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@react-leaflet/core": "^1.1.0",
+    "chroma-js": "^1.4.1",
+    "geoblaze": "^0.3.2",
+    "georaster-layer-for-leaflet": "^1.0.2",
+    "next": "^10.2.0",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "react-leaflet": "^3.2.0"
+  }
+}
