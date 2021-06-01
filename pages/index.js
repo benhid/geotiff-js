@@ -10,6 +10,7 @@ const Index = () => {
       <section>
         <h1>Map</h1>
         <DynamicMap />
+        <a href="https://github.com/benhid/geotiff-js">Github</a>
       </section>
     </>
   );

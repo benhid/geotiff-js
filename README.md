@@ -1,4 +1,31 @@
-# TODO
+# GIS raster viewer
 
-- Load geotiff from url with options, e.g., `/map?geotiff=https://blabla.com/geo.tiff&zoom=6&scale=Viridis&opacity=0.2`
-- Custom react component?
+This is just a demo of how to combine [`geoblaze`](https://github.com/GeoTIFF/geoblaze) and [`leaflet`](https://leafletjs.com) (with [`georaster-layer-for-leaflet`](https://github.com/GeoTIFF/georaster-layer-for-leaflet)) to display GeoTIFF files in the browser.
+
+### ✨ Setup
+
+#### Installation
+
+To install all dependencies, run
+
+```bash
+npm install
+```
+
+#### Development
+
+To run locally, use
+
+```bash
+npm run dev
+```
+
+Application will be available at `http://localhost:3000`
+
+### 🚀 Deployment
+
+Use
+
+```bash
+npm run build && npm run start
+```

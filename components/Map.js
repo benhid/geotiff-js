@@ -95,7 +95,7 @@ const Map = ({ center, zoom, min, max, noDataValue }) => {
       <div>
         <select onChange={(e) => setGeotiff(e.target.value)}>
           <option value="/wind_speed_usa.tif">wind_speed_usa.tif</option>
-          <option value="https://danwild.github.io/leaflet-geotiff-2/wind_speed.tif">wind_speed.tif</option>
+          <option value="/wind_speed.tif">wind_speed.tif</option>
           <option value="/LC08_L1TP_045032_20180811_20180815_01_T1_B5.TIF">LC08_L1TP.tif</option>
         </select>
         <select onChange={(e) => setMapTheme(e.target.value)}>
