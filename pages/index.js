@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 
 const Index = () => {
   const DynamicMap = dynamic(() => import('../components/Map'), { ssr: false, loading: () => <p>Loading</p> });
+
   return (
     <>
       <section>

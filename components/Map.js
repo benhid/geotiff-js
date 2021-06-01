@@ -1,30 +1,59 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
-import { MapContainer, TileLayer, LayersControl } from "react-leaflet";
+import { MapContainer, TileLayer } from "react-leaflet";
 
 import geoblaze from "geoblaze";
 import GeoRasterLayer from "georaster-layer-for-leaflet";
 import chroma from "chroma-js";
 
-const Map = ({ center, zoom }) => {
+const Map = ({ center, zoom, min, max, noDataValue }) => {
   const [map, setMap] = useState();
+
+  // map opts
   const [mapCenter, setMapCenter] = useState(center || { lat: -33, lng: 147 });
   const [mapZoom, setMapZoom] = useState(zoom || 6);
-  const [mapTheme, setMapTheme] = useState("Viridis");
-  const [geotiff, setGeotiff] = useState();
-  const [activeLayer, setActiveLayer] = useState();
+  const [mapTheme, setMapTheme] = useState("RdYlBu");
 
+  // layer opts
+  const [activeLayer, setActiveLayer] = useState();
+  const layerNoDataValue = noDataValue || 0;
+  const [layerOpacity, setLayerOpacity] = useState(0.7);
+  const [activeLayerMin, setActiveLayerMin] = useState();
+  const [activeLayerMax, setActiveLayerMax] = useState();
+  const [layerMin, setLayerMin] = useState(min);
+  const [layerMax, setLayerMax] = useState(max);
+
+  // geotiff
+  const [geotiff, setGeotiff] = useState("/wind_speed_usa.tif");
+
+  /*
+  Remove active layer from map.
+  */
   const clearActiveLayer = () => {
-    activeLayer && map.removeLayer(activeLayer);
+    if (activeLayer) {
+      console.log("deleting active layer")
+      map.removeLayer(activeLayer);
+    }
   }
 
+  /*
+  Load geotiff raster from URL or file.
+  */
   const loadGeotiff = () => {
+    console.log("loading geotiff")
+
     geotiff &&
       geoblaze
         .load(geotiff)
         .then(georaster => {
-          const min = georaster.mins[0];
-          const range = georaster.ranges[0];
+          const min = layerMin || georaster.mins[0];
+          const max = layerMax || georaster.maxs[0];
+          const range = max - min; // georaster.ranges[0];
+
+          setActiveLayerMin(min);
+          setActiveLayerMax(max);
+
+          console.log("min value " + min + ", max value " + max);
 
           // available color scales can be found by running console.log(chroma.brewer);
           const scale = chroma.scale(mapTheme);
@@ -33,9 +62,9 @@ const Map = ({ center, zoom }) => {
             const pixelValues = bands[0]; // !!! there's just one band in this raster
 
             // don't return a color
-            if (pixelValues === 0) return null;
+            if (pixelValues === layerNoDataValue) return null;
 
-            // scale to 0 - 1 used by chroma
+            // scale to 0-1 used by chroma
             const scaledPixelValue = (pixelValues - min) / range;
 
             const color = scale(scaledPixelValue).hex();
@@ -45,10 +74,15 @@ const Map = ({ center, zoom }) => {
 
           const layer = new GeoRasterLayer({
             georaster: georaster,
-            opacity: 0.7,
+            opacity: layerOpacity,
             pixelValuesToColorFn: colorFn,
             resolution: 64 // optional parameter for adjusting display resolution
           });
+
+          // restore map
+          clearActiveLayer();
+
+          // add new layer
           layer.addTo(map);
           setActiveLayer(layer);
 
@@ -56,25 +90,25 @@ const Map = ({ center, zoom }) => {
         });
   };
 
-  useEffect(() => {
-    // restore map
-    clearActiveLayer();
-    // load geotiff
-    loadGeotiff()
-  }, [geotiff, mapTheme])
-
   return (
     <>
       <div>
-        <button onClick={() => setGeotiff("/wind_speed_usa.tif")}>load sample 1</button>
-        <button onClick={() => setGeotiff("/LC08_L1TP_045032_20180811_20180815_01_T1_B5.TIF")}>load sample 2</button>
+        <select onChange={(e) => setGeotiff(e.target.value)}>
+          <option value="/wind_speed_usa.tif">wind_speed_usa.tif</option>
+          <option value="https://danwild.github.io/leaflet-geotiff-2/wind_speed.tif">wind_speed.tif</option>
+          <option value="/LC08_L1TP_045032_20180811_20180815_01_T1_B5.TIF">LC08_L1TP.tif</option>
+        </select>
+        <select onChange={(e) => setMapTheme(e.target.value)}>
+          <option value="RdYlBu">RdYlBu</option>
+          <option value="greys">Greys</option>
+          <option value="viridis">Viridis</option>
+        </select>
+        <input type="number" placeholder="opacity" value={layerOpacity} step="0.1" min="0.0" max="1.0" onChange={(e) => setLayerOpacity(e.target.value)} />
+        <input type="number" placeholder="min" onChange={(e) => setLayerMin(e.target.value)} />
+        <input type="number" placeholder="max" onChange={(e) => setLayerMax(e.target.value)} />
       </div>
       <div>
-        <button onClick={() => setMapTheme("Viridis")}>set theme viridis</button>
-        <button onClick={() => setMapTheme("Spectral")}>set theme spectral</button>
-      </div>
-      <div>
-        <button onClick={() => clearActiveLayer()}>clear</button>
+        <button onClick={() => loadGeotiff()}>load</button>
       </div>
       <MapContainer
         center={mapCenter}
